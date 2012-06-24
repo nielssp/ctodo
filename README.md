@@ -2,7 +2,7 @@ ctodo
 =====
 A simple ncurses-based task list manager
 
-Website: [http://ctodo.apakoh.dk]
+Website: http://ctodo.apakoh.dk
 
 License
 -------

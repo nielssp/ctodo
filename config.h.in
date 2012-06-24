@@ -1,0 +1,5 @@
+/**
+ * @file
+ * Configuration file
+ */
+#define CTODO_VERSION "@ctodo_VERSION_MAJOR@.@ctodo_VERSION_MINOR@"
