@@ -1,11 +1,9 @@
-ctodo
-=====
+# ctodo
 A simple ncurses-based task list manager
 
 Website: http://ctodo.apakoh.dk
 
-License
--------
+## License
 Copyright (C) 2012 Niels Sonnich Poulsen (http://apakoh.dk)
 
 Permission is hereby granted, free of charge, to any person
@@ -28,14 +26,17 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Requirements
-------------
+## Requirements
+### Linux
 * `ncurses`
 * A C-compiler like `gcc`
 * `cmake` (not actually necessary)
 
-Installation
-------------
+### Windows
+* Windows XP or newer
+
+## Installation
+### Linux
 * Run cmake:
 
         cmake .
@@ -53,8 +54,11 @@ single source file:
 
     gcc -lncurses -o ctodo ctodo.c
 
-Usage
------
+### Windows
+Run the installer, e.g. `ctodo-1.1-setup.exe`.
+
+## Usage
+### Linux
 Run from a console using:
 
     ctodo
@@ -68,8 +72,14 @@ Alternatively you can run ctodo using:
 
 Which will open/create `someotherfile.txt` in the current directory.
 
-Commands
---------
+### Windows
+Right click in any directory (or on the desktop) and open the `New`-menu. If ctodo was installed
+using the installer, the option `Task List` should be available. Click on it.
+
+This will create an empty task list which you can open with ctodo by double clicking on it
+(if you installed using the installer).
+
+##Commands
 * Navigation:
 
   Use `UP` and `DOWN` arrows to move between tasks
