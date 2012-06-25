@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (ctodo)
 set (ctodo_VERSION_MAJOR 1)
-set (ctodo_VERSION_MINOR 0)
+set (ctodo_VERSION_MINOR 1)
 
 configure_file (
   "${PROJECT_SOURCE_DIR}/config.h.in"

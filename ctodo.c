@@ -376,7 +376,8 @@ char *get_input_edit(char *label, char *buffer) {
       case 360: /* end */
         cursorpos = bc;
         break;
-      case 127: /* backspace */
+      case 8: /* backspace */
+      case 127: /* also backspace */
         if (cursorpos > 0) {
           cursorpos--;
           memcpy(buffer + cursorpos, buffer + cursorpos + 1, bc - cursorpos - 1);
