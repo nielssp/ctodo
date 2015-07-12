@@ -3,6 +3,8 @@ A simple ncurses-based task list manager
 
 Website: http://ctodo.apakoh.dk
 
+![Screenshot.](http://ctodo.apakoh.dk/screenshot.png)
+
 ## License
 Copyright (C) 2012 Niels Sonnich Poulsen (http://apakoh.dk)
 
