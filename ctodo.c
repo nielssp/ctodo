@@ -662,6 +662,9 @@ int main(int argc, char *argv[]) {
         break;
       case ' ':
       case 10: /* enter */
+        if (!selected) {
+          break;
+        }
         selected->done ^= 1;
         status = 1;
         break;
