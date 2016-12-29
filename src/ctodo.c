@@ -463,6 +463,7 @@ int main(int argc, char *argv[]) {
             add_task(todolist, input_text, 0, 0);
           }
           status = STATUS_UNSAVED;
+          i++;
         }
         else {
           free(input_text);
@@ -481,6 +482,8 @@ int main(int argc, char *argv[]) {
             add_task(todolist, input_text, 0, 0);
           }
           status = STATUS_UNSAVED;
+          highlight = 0;
+          i++;
         }
         else {
           free(input_text);
@@ -499,6 +502,8 @@ int main(int argc, char *argv[]) {
             add_task(todolist, input_text, 0, 0);
           }
           status = STATUS_UNSAVED;
+          highlight++;
+          i++;
         }
         else {
           free(input_text);
@@ -516,6 +521,8 @@ int main(int argc, char *argv[]) {
         if (input_text[0]) {
           add_task(todolist, input_text, 0, 0);
           status = STATUS_UNSAVED;
+          highlight = i;
+          i++;
         }
         else {
           free(input_text);
