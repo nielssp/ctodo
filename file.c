@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
+#include <errno.h>
 
 #include "file.h"
 #include "stream.h"
@@ -176,7 +178,7 @@ TODOLIST *load_todolist(char *filename) {
       return load_todolist(filename);
     }
     else {
-      error("Could not access file");
+      error("%s", strerror(errno));
       return NULL;
     }
   }
@@ -235,7 +237,7 @@ int save_todolist(TODOLIST *todolist, char *filename) {
   STREAM *output;
   STREAM *file = stream_file(filename, "w");
   if (!file) {
-    error("Could not write to file");
+    error("%s", strerror(errno));
     return 0;
   }
   write_todolist(file, todolist);

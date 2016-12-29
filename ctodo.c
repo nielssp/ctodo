@@ -76,6 +76,7 @@ void print_message(char *format, ...) {
   getmaxyx(stdscr, rows, cols);
   len = strlen(message);
   x = cols / 2 - (len + 4) / 2;
+  if (x < 0) x = 0;
   move(rows - 2, 0);
   clrtoeol();
   attron(A_REVERSE);
@@ -239,7 +240,7 @@ void print_bar(char *status, int rows, int cols, int tasks) {
 }
 
 void fatal_error() {
-  mvprintw(2, 4, "error: %s", get_last_error());
+  mvprintw(2, 4, "%s", get_last_error());
   refresh();
   getch();
   endwin();
@@ -269,15 +270,19 @@ int main(int argc, char *argv[]) {
   }
   todolist = load_todolist(filename);
 
-  mvprintw(0, 0, "ctodo %s", CTODO_VERSION);
+  mvprintw(0, 0, "  ctodo %s", CTODO_VERSION);
 
-  if (!todolist)
+  if (!todolist) {
+    error("Could not open %s: %s", filename, get_last_error());
     fatal_error();
+  }
 
   if (get_option_bit(todolist, "autosync")) {
     origin = copy_option(todolist, "origin");
     if (origin) {
-      mvprintw(2, 5, "Synchronizing...");
+      mvprintw(2, 5, "Synchronizing tasks...");
+      mvprintw(4, 5, "Downloading:");
+      print_multiline(5, 5, origin, cols - 9);
       refresh();
       // TODO: merge
       TODOLIST *new = pull_todolist(origin);
@@ -372,12 +377,12 @@ int main(int argc, char *argv[]) {
         break;
       case 'z': // TODO
         if (origin) {
-            print_message("Synchronizing...");
+            print_message("Synchronizing tasks...");
           refresh();
           if (!push_todolist(todolist, origin))
             print_message("Synchronization failed: %s", get_last_error());
           else
-            print_message("Synchronized!");
+            print_message("Synchronization complete!");
         }
         break;
       case 'R':
@@ -385,10 +390,13 @@ int main(int argc, char *argv[]) {
         i = 0;
         delete_todolist(todolist);
         todolist = load_todolist(filename);
-        if (!todolist)
-          print_message("Could not read file: %s", get_last_error());
-        status = STATUS_SAVED;
-        clear();
+        if (!todolist) {
+          print_message("Could not load %s: %s", filename, get_last_error());
+        }
+        else {
+          status = STATUS_SAVED;
+          clear();
+        }
         break;
       case 'S':
       case 's':
@@ -396,10 +404,9 @@ int main(int argc, char *argv[]) {
           status = STATUS_SAVED;
         }
         else {
-          print_message("Could not save file: %s", get_last_error());
+          print_message("Could not save %s: %s", filename, get_last_error());
           status = STATUS_UNSAVED;
         }
-        clear();
         break;
       case 'D':
       case 'd':
@@ -556,18 +563,19 @@ int main(int argc, char *argv[]) {
       default:
         if (isgraph(ch))
           print_message("Unbound key: %c", ch);
+        else if (ch < ' ')
+          print_message("Unbound key: ^%c", '@' + ch);
         else 
           print_message("Unbound key: (%d)", ch);
-        /* mvprintw(0, 0, "Key pressed: %d", ch); */
         break;
     }
 
     if (ch == 'q' || ch == 'Q') {
-      if (status == STATUS_SAVED || save_todolist(todolist, filename)) {
+      if (status == STATUS_SAVED || save_todolist(todolist, filename) || ch == 'Q') {
         break;
       }
       else {
-        print_message("Could not save file: %s", get_last_error());
+        print_message("Could not save %s: %s", filename, get_last_error());
       }
     }
   }

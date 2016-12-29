@@ -48,8 +48,11 @@ TODOLIST *pull_todolist(char *origin) {
 
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-    if (res != CURLE_OK || http_status != 200) {
-      error("Could not download file");
+    if (res != CURLE_OK) {
+      error("Error: %s", curl_easy_strerror(res));
+    }
+    else if (http_status != 200) {
+      error("Server returned %d", http_status);
     }
     else {
       list = parse_todolist(downloaded_file, downloaded_file_size);
@@ -86,8 +89,12 @@ int push_todolist(TODOLIST *todolist, char *origin) {
 
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-    if (res != CURLE_OK || http_status != 200) {
-      error("Could not upload file");
+    if (res != CURLE_OK) {
+      error("Error: %s", curl_easy_strerror(res));
+      status = 0;
+    }
+    else if (http_status != 200) {
+      error("Server returned %d", http_status);
       status = 0;
     }
 

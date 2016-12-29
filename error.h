@@ -6,7 +6,9 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-void error(char *error);
+void error(const char *format, ...);
+int has_error();
+void unset_error();
 char *get_last_error();
 
 #endif

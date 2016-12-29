@@ -6,6 +6,8 @@
 #ifndef STREAM_H
 #define STREAM_H
 
+#include <stdlib.h>
+
 typedef struct STREAM STREAM;
 
 STREAM *stream_file(const char *filename, const char *mode);
