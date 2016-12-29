@@ -1,44 +1,25 @@
-/**
- * @file
- * A simple ncurses-based tasklist manager
- *
- * This program is open source.
- * For license terms, see the LICENSE file.
- *
- * @version 1.0
- * @author Niels Sonnich Poulsen (http://ctodo.apakoh.dk)
- * @copyright See LICENSE file
- */
+// ctodo
+// Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
+// Licensed under the MIT license.
+// See the LICENSE file or http://opensource.org/licenses/MIT for more information.
 
 #include <ncurses.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 
-#include <config.h>
+#include "config.h"
+#include "task.h"
+#include "file.h"
+#include "sync.h"
+#include "stream.h"
+#include "error.h"
 
-typedef struct TASK {
-  char *message;
-  int done;
-  int priority;
-  struct TASK *next;
-} TASK;
+#define STATUS_SAVED "Saved"
+#define STATUS_UNSAVED "Unsaved"
 
-typedef struct TODOLIST {
-  char *title;
-  TASK *first;
-  TASK *last;
-} TODOLIST;
-
-char *error_string = "undefined";
-
-char *status_str[] = {
-  "[Saved]",
-  "[Unsaved]",
-  "[Unable to save]"
-};
-
-struct key_func {
+struct {
   char key;
   char *func;
 } key_funcs[] = {
@@ -51,218 +32,6 @@ struct key_func {
   {'T', "Title"},
   {0, NULL}
 };
-
-void error(char *error) {
-  error_string = error;
-}
-
-char *get_last_error() {
-  return error_string;
-}
-
-void delete_task(TASK *delete, TODOLIST *list) {
-  TASK *task = list->first;
-  if (task == delete) {
-    list->first = delete->next;
-    if (delete == list->last) {
-      list->last = NULL;
-    }
-  }
-  else {
-    while (task) {
-      if (task->next == delete) {
-        task->next = delete->next;
-        if (delete == list->last) {
-          list->last = task;
-        }
-        break;
-      }
-      task = task->next;
-    }
-  }
-  free(delete->message);
-  free(delete);
-}
-
-void add_task(TODOLIST *list, char *message, int done, int priority) {
-  TASK *task = (TASK *)malloc(sizeof(TASK));
-  if (!task) {
-    return;
-  }
-  task->message = message;
-  task->done = done;
-  task->priority = priority;
-  task->next = NULL;
-  if (!list->first) {
-    list->first = task;
-  }
-  else {
-    list->last->next = task;
-  }
-  list->last = task;
-}
-
-void skip_whitespace(FILE *file) {
-  int c;
-  while ((c = fgetc(file)) != EOF && isspace(c)) {
-  }
-  ungetc(c, file);
-}
-
-void skip_line(FILE *file) {
-  int c;
-  while ((c = fgetc(file)) != EOF && c != '\n') {
-  }
-  ungetc(c, file);
-}
-
-char *increase_buffer(char *buffer, int oldsize, int newsize) {
-  char *new = NULL;
-  if (newsize < oldsize) {
-    return NULL;
-  }
-  new = (char *)malloc(newsize);
-  if (!new) {
-    return NULL;
-  }
-  memcpy(new, buffer, oldsize);
-  free(buffer);
-  return new;
-}
-
-char read_char(FILE *file) {
-  if (file) {
-    return fgetc(file);
-  }
-  else {
-    return getch();
-  }
-}
-
-char *read_string(FILE *file) {
-  int buffersize = 10;
-  int c, i = 0;
-  char *newbuffer = NULL;
-  char *buffer = (char *)malloc(buffersize);
-  while ((c = read_char(file)) != EOF && c != '\n') {
-    buffer[i++] = c;
-    if (i >= buffersize) {
-      newbuffer = increase_buffer(buffer, buffersize, buffersize + buffersize);
-      if (!newbuffer) {
-        free(buffer);
-        return NULL;
-      }
-      buffer = newbuffer;
-      buffersize += buffersize;
-    }
-  }
-  buffer[i] = 0;
-  return buffer;
-}
-
-void load_next_task(FILE *file, TODOLIST *list) {
-  char c;
-  char *message = NULL;
-  int done = 0;
-  int priority = 0;
-  skip_whitespace(file);
-  c = fgetc(file);
-  if (c != '[') {
-    ungetc(c, file);
-    skip_line(file);
-    return;
-  }
-  c = fgetc(file);
-  switch (c) {
-    case 'X':
-    case 'x':
-      done = 1;
-      break;
-    case ' ':
-      done = 0;
-      break;
-    default:
-      ungetc(c, file);
-      skip_line(file);
-      return;
-  }
-  c = fgetc(file);
-  if (c != ']') {
-    ungetc(c, file);
-    skip_line(file);
-    return;
-  }
-  skip_whitespace(file);
-  message = read_string(file);
-  add_task(list, message, done, priority);
-}
-
-void delete_todolist(TODOLIST *todolist) {
-  TASK *task = todolist->first;
-  TASK *temp = NULL;
-  while (task) {
-    temp = task;
-    task = task->next;
-    free(temp->message);
-    free(temp);
-  }
-  free(todolist->title);
-  free(todolist);
-}
-
-int touch_file(char *filename) {
-  FILE *file = fopen(filename, "w+");
-  if (!file) {
-    return 0;
-  }
-  fclose(file);
-  return 1;
-}
-
-TODOLIST *load_todolist(char *filename) {
-  TODOLIST *list = NULL;
-  FILE *file = fopen(filename, "r");
-  if (!file) {
-    if (touch_file(filename)) {
-      return load_todolist(filename);
-    }
-    else {
-      error("Could not access file");
-      return NULL;
-    }
-  }
-  list = (TODOLIST *)malloc(sizeof(TODOLIST));
-  if (!list) {
-    fclose(file);
-    error("Could not allocate memory");
-    return NULL;
-  }
-  list->first = NULL;
-  list->last = NULL;
-  list->title = read_string(file);
-  while (!feof(file)) {
-    load_next_task(file, list);
-  }
-  return list;
-}
-
-int save_todolist(TODOLIST *todolist, char *filename) {
-  TASK *task = NULL;
-  FILE *file = fopen(filename, "w");
-  if (!file) {
-    error("Could not write to file");
-    return 0;
-  }
-  fprintf(file, "%s\n", todolist->title);
-  task = todolist->first;
-  while (task) {
-    fprintf(file, "[%c] %s\n",
-        task->done ? 'X' : ' ', task->message);
-    task = task->next;
-  }
-  fclose(file);
-  return 1;
-}
 
 int print_multiline(int y, int x, char *str, int maxwidth) {
   int sc = 0, tc = 0, lc = 0, bc = 0;
@@ -295,6 +64,24 @@ int print_multiline(int y, int x, char *str, int maxwidth) {
     }
   }
   return splits;
+}
+
+void print_message(char *format, ...) {
+  int rows, cols, len, x;
+  char *message;
+  va_list va;
+  va_start(va, format);
+  message = string_vprintf(format, va);
+  va_end(va);
+  getmaxyx(stdscr, rows, cols);
+  len = strlen(message);
+  x = cols / 2 - (len + 4) / 2;
+  move(rows - 2, 0);
+  clrtoeol();
+  attron(A_REVERSE);
+  mvprintw(rows - 2, x, "[ %s ]", message);
+  free(message);
+  attroff(A_REVERSE);
 }
 
 char *get_input_edit(char *label, char *buffer) {
@@ -405,7 +192,7 @@ char *get_input_edit(char *label, char *buffer) {
           }
           if (bc >= buffersize) {
             bufferlines++;
-            newbuffer = increase_buffer(buffer, buffersize, buffersize + linesize);
+            newbuffer = resize_buffer(buffer, buffersize, buffersize + linesize);
             if (!newbuffer) {
               free(buffer);
               error("Could not increase size of buffer");
@@ -429,19 +216,26 @@ char *get_input(char *label) {
   return get_input_edit(label, NULL);
 }
 
-void print_bar(int status, int rows, int cols, int tasks) {
-  int i;
+void print_bar(char *status, int rows, int cols, int tasks) {
+  int i, x;
   for (i = 0; key_funcs[i].key > 0; i++) {
     attron(A_REVERSE);
     mvprintw(rows - 1, i * 9, "%c", key_funcs[i].key);
     attroff(A_REVERSE);
     mvprintw(rows - 1, i * 9 + 2, "%s", key_funcs[i].func);
   }
-  mvprintw(rows - 1, cols - strlen(status_str[status]) - 3, "%s  ", status_str[status]);
-  mvprintw(0, cols - 16, "%10d %stask%s", 
+  attron(A_REVERSE);
+  for (i = 0; i < cols; i++) {
+    mvprintw(0, i, " ");
+  }
+  mvprintw(0, 2, "ctodo %s", CTODO_VERSION);
+  mvprintw(0, cols - 18, "%10d %stask%s", 
       tasks,
       tasks == 1 ? " " : "",
       tasks == 1 ? "" : "s");
+  x = cols / 2 - strlen(status) / 2;
+  mvprintw(0, x, "%s", status);
+  attroff(A_REVERSE);
 }
 
 void fatal_error() {
@@ -455,7 +249,9 @@ void fatal_error() {
 int main(int argc, char *argv[]) {
   char *filename = "todo.txt";
   char *input_text = NULL;
-  int rows, cols, ch, y, highlight = 0, i = 0, status = 0,
+  char *origin = NULL;
+  char *status = STATUS_SAVED;
+  int rows, cols, ch, y, highlight = 0, i = 0,
       orows, ocols, top = 0, bottom = 0;
   TASK *task = NULL;
   TASK *selected = NULL;
@@ -467,7 +263,7 @@ int main(int argc, char *argv[]) {
   curs_set(0);
   keypad(stdscr, TRUE);
   noecho();
-  
+
   if (argc > 1) {
     filename = argv[1];
   }
@@ -478,6 +274,23 @@ int main(int argc, char *argv[]) {
   if (!todolist)
     fatal_error();
 
+  if (get_option_bit(todolist, "autosync")) {
+    origin = copy_option(todolist, "origin");
+    if (origin) {
+      mvprintw(2, 5, "Synchronizing...");
+      refresh();
+      // TODO: merge
+      TODOLIST *new = pull_todolist(origin);
+      if (new) {
+        delete_todolist(todolist);
+        todolist = new;
+      }
+      else {
+        print_message("Synchronization failed: %s", get_last_error());
+      }
+    }
+  }
+
   while (1) {
     orows = rows;
     ocols = cols;
@@ -485,7 +298,6 @@ int main(int argc, char *argv[]) {
     if (orows != rows || ocols != cols) {
       clear();
     }
-    mvprintw(0, 0, "ctodo %s", CTODO_VERSION);
     y = 2;
     y += print_multiline(y, 4, todolist->title, cols - 8) + 1;
     task = todolist->first;
@@ -526,31 +338,47 @@ int main(int argc, char *argv[]) {
       case 'K':
       case KEY_UP:
         highlight--;
-        clear();
+        if (highlight < top)
+          clear();
         break;
       case 'j':
       case 'J':
       case KEY_DOWN:
         highlight++;
-        clear();
+        if (highlight > bottom)
+          clear();
         break;
       case 21: /* ^U */
       case 339: /* page up */
         highlight -= 5;
-        clear();
+        if (highlight < top)
+          clear();
         break;
       case 4: /* ^D */
       case 338: /* page down */
         highlight += 5;
-        clear();
+        if (highlight > bottom)
+          clear();
         break;
+      case 'g':
       case 262: /* home */
         highlight = 0;
         clear();
         break;
+      case 'G':
       case 360: /* end */
         highlight = i - 1;
         clear();
+        break;
+      case 'z': // TODO
+        if (origin) {
+            print_message("Synchronizing...");
+          refresh();
+          if (!push_todolist(todolist, origin))
+            print_message("Synchronization failed: %s", get_last_error());
+          else
+            print_message("Synchronized!");
+        }
         break;
       case 'R':
       case 'r':
@@ -558,17 +386,18 @@ int main(int argc, char *argv[]) {
         delete_todolist(todolist);
         todolist = load_todolist(filename);
         if (!todolist)
-          fatal_error();
-        status = 0;
+          print_message("Could not read file: %s", get_last_error());
+        status = STATUS_SAVED;
         clear();
         break;
       case 'S':
       case 's':
         if (save_todolist(todolist, filename)) {
-          status = 0;
+          status = STATUS_SAVED;
         }
         else {
-          status = 2;
+          print_message("Could not save file: %s", get_last_error());
+          status = STATUS_UNSAVED;
         }
         clear();
         break;
@@ -580,19 +409,74 @@ int main(int argc, char *argv[]) {
         if (selected) {
           delete_task(selected, todolist);
         }
-        status = 1;
+        status = STATUS_UNSAVED;
         clear();
         break;
+      case 'i':
+        input_text = get_input("Insert task");
+        if (!input_text)
+          fatal_error();
+        if (input_text[0]) {
+          if (selected) {
+            insert_task(todolist, selected, input_text, 0, 0);
+          }
+          else {
+            add_task(todolist, input_text, 0, 0);
+          }
+          status = STATUS_UNSAVED;
+        }
+        else {
+          free(input_text);
+        }
+        clear();
+        break;
+      case 'I':
+        input_text = get_input("Insert task");
+        if (!input_text)
+          fatal_error();
+        if (input_text[0]) {
+          if (todolist->first) {
+            insert_task(todolist, todolist->first, input_text, 0, 0);
+          }
+          else {
+            add_task(todolist, input_text, 0, 0);
+          }
+          status = STATUS_UNSAVED;
+        }
+        else {
+          free(input_text);
+        }
+        clear();
+        break;
+      case 'a':
+        input_text = get_input("Append task");
+        if (!input_text)
+          fatal_error();
+        if (input_text[0]) {
+          if (selected && selected->next) {
+            insert_task(todolist, selected->next, input_text, 0, 0);
+          }
+          else {
+            add_task(todolist, input_text, 0, 0);
+          }
+          status = STATUS_UNSAVED;
+        }
+        else {
+          free(input_text);
+        }
+        clear();
+        break;
+      case 'A':
       case 'N':
       case 'n':
       case '+':
       case 331: /* ins */
-        input_text = get_input("New task");
+        input_text = get_input("Append task");
         if (!input_text)
           fatal_error();
         if (input_text[0]) {
           add_task(todolist, input_text, 0, 0);
-          status = 1;
+          status = STATUS_UNSAVED;
         }
         else {
           free(input_text);
@@ -609,7 +493,7 @@ int main(int argc, char *argv[]) {
         if (input_text[0]) {
           free(selected->message);
           selected->message = input_text;
-          status = 1;
+          status = STATUS_UNSAVED;
         }
         else {
           free(input_text);
@@ -626,7 +510,7 @@ int main(int argc, char *argv[]) {
         if (input_text[0]) {
           free(selected->message);
           selected->message = input_text;
-          status = 1;
+          status = STATUS_UNSAVED;
         }
         else {
           free(input_text);
@@ -640,7 +524,7 @@ int main(int argc, char *argv[]) {
         if (input_text[0]) {
           free(todolist->title);
           todolist->title = input_text;
-          status = 1;
+          status = STATUS_UNSAVED;
         }
         else {
           free(input_text);
@@ -654,7 +538,7 @@ int main(int argc, char *argv[]) {
         if (input_text[0]) {
           free(todolist->title);
           todolist->title = input_text;
-          status = 1;
+          status = STATUS_UNSAVED;
         }
         else {
           free(input_text);
@@ -667,19 +551,23 @@ int main(int argc, char *argv[]) {
           break;
         }
         selected->done ^= 1;
-        status = 1;
+        status = STATUS_UNSAVED;
         break;
       default:
+        if (isgraph(ch))
+          print_message("Unbound key: %c", ch);
+        else 
+          print_message("Unbound key: (%d)", ch);
         /* mvprintw(0, 0, "Key pressed: %d", ch); */
         break;
     }
 
     if (ch == 'q' || ch == 'Q') {
-      if (save_todolist(todolist, filename) || status == 2) {
+      if (status == STATUS_SAVED || save_todolist(todolist, filename)) {
         break;
       }
       else {
-        status = 2;
+        print_message("Could not save file: %s", get_last_error());
       }
     }
   }
