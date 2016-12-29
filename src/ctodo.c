@@ -12,9 +12,12 @@
 #include "config.h"
 #include "task.h"
 #include "file.h"
-#include "sync.h"
 #include "stream.h"
 #include "error.h"
+
+#ifdef SYNC_ENABLE
+#include "sync.h"
+#endif
 
 #define STATUS_SAVED "Saved"
 #define STATUS_UNSAVED "Unsaved"
@@ -277,6 +280,7 @@ int main(int argc, char *argv[]) {
     fatal_error();
   }
 
+#ifdef SYNC_ENABLE
   if (get_option_bit(todolist, "autosync")) {
     origin = copy_option(todolist, "origin");
     if (origin) {
@@ -295,6 +299,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+#endif
 
   while (1) {
     orows = rows;
@@ -391,6 +396,7 @@ int main(int argc, char *argv[]) {
           clear();
         }
         break;
+#ifdef SYNC_ENABLE
       case 'z': // TODO
         if (origin) {
             print_message("Synchronizing tasks...");
@@ -401,6 +407,7 @@ int main(int argc, char *argv[]) {
             print_message("Synchronization complete!");
         }
         break;
+#endif
       case 'R':
       case 'r':
         i = 0;

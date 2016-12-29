@@ -1,5 +1,2 @@
-/**
- * @file
- * Configuration file
- */
-#define CTODO_VERSION "@ctodo_VERSION_MAJOR@.@ctodo_VERSION_MINOR@"
+#cmakedefine CTODO_VERSION "@CTODO_VERSION@"
+#cmakedefine SYNC_ENABLE
