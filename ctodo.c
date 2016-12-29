@@ -375,6 +375,22 @@ int main(int argc, char *argv[]) {
         highlight = i - 1;
         clear();
         break;
+      case 337: /* S-Up */
+        if (selected) {
+          move_task_up(todolist, selected);
+          highlight--;
+          status = STATUS_UNSAVED;
+          clear();
+        }
+        break;
+      case 336: /* S-Down */
+        if (selected) {
+          move_task_down(todolist, selected);
+          highlight++;
+          status = STATUS_UNSAVED;
+          clear();
+        }
+        break;
       case 'z': // TODO
         if (origin) {
             print_message("Synchronizing tasks...");

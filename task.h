@@ -11,6 +11,7 @@ typedef struct TASK {
   int done;
   int priority;
   struct TASK *next;
+  struct TASK *prev;
 } TASK;
 
 typedef struct OPTION {
@@ -30,6 +31,9 @@ typedef struct {
 void delete_task(TASK *delete, TODOLIST *list);
 void add_task(TODOLIST *list, char *message, int done, int priority);
 void insert_task(TODOLIST *list, TASK *next, char *message, int done, int priority);
+void move_task_up(TODOLIST *list, TASK *task);
+void move_task_down(TODOLIST *list, TASK *task);
+
 char *get_option(TODOLIST *todolist, char *key);
 char *copy_option(TODOLIST *todolist, char *key);
 int get_option_bit(TODOLIST *todolist, char *key);

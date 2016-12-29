@@ -9,24 +9,17 @@
 #include "task.h"
 
 void delete_task(TASK *delete, TODOLIST *list) {
-  TASK *task = list->first;
-  if (task == delete) {
-    list->first = delete->next;
-    if (delete == list->last) {
-      list->last = NULL;
-    }
+  if (delete->prev) {
+    delete->prev->next = delete->next;
   }
   else {
-    while (task) {
-      if (task->next == delete) {
-        task->next = delete->next;
-        if (delete == list->last) {
-          list->last = task;
-        }
-        break;
-      }
-      task = task->next;
-    }
+    list->first = delete->next;
+  }
+  if (delete->next) {
+    delete->next->prev = delete->prev;
+  }
+  else {
+    list->last = delete->prev;
   }
   free(delete->message);
   free(delete);
@@ -41,6 +34,7 @@ void add_task(TODOLIST *list, char *message, int done, int priority) {
   task->done = done;
   task->priority = priority;
   task->next = NULL;
+  task->prev = list->last;
   if (!list->first) {
     list->first = task;
   }
@@ -59,19 +53,57 @@ void insert_task(TODOLIST *list, TASK *next, char *message, int done, int priori
   task->done = done;
   task->priority = priority;
   task->next = next;
+  task->prev = next->prev;
   if (list->first == next) {
     list->first = task;
   }
   else {
-    TASK *prev = list->first;
-    while (prev) {
-      if (prev->next == next) {
-        prev->next = task;
-        break;
-      } else {
-        prev = prev->next;
-      }
+    next->prev->next = task;
+  }
+  next->prev = task;
+}
+
+void move_task_up(TODOLIST *list, TASK *task) {
+  if (task->prev) {
+    TASK *prev = task->prev;
+    task->prev = prev->prev;
+    if (task->prev) {
+      task->prev->next = task;
     }
+    else {
+      list->first = task;
+    }
+    prev->prev = task;
+    prev->next = task->next;
+    if (prev->next) {
+      prev->next->prev = prev;
+    }
+    else {
+      list->last = prev;
+    }
+    task->next = prev;
+  }
+}
+
+void move_task_down(TODOLIST *list, TASK *task) {
+  if (task->next) {
+    TASK *next = task->next;
+    task->next = next->next;
+    if (task->next) {
+      task->next->prev = task;
+    }
+    else {
+      list->last = task;
+    }
+    next->next = task;
+    next->prev = task->prev;
+    if (next->prev) {
+      next->prev->next = next;
+    }
+    else {
+      list->first = next;
+    }
+    task->prev = next;
   }
 }
 
