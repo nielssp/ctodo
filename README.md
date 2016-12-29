@@ -6,7 +6,7 @@ Website: http://ctodo.apakoh.dk
 ![Screenshot.](http://ctodo.apakoh.dk/screenshot.png)
 
 ## License
-Copyright (C) 2012 Niels Sonnich Poulsen (http://apakoh.dk)
+Copyright (C) 2012 Niels Sonnich Poulsen (http://nielssp.dk)
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -51,11 +51,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 
          make install
 
-Alternatively you could just use `gcc` to compile the
-single source file:
-
-    gcc -lncurses -o ctodo ctodo.c
-
 ### Windows
 Run the installer, e.g. `ctodo-1.1-setup.exe`.
 
@@ -90,7 +85,7 @@ This will create an empty task list which you can open with ctodo by double clic
   `PAGE UP` moves 5 tasks up and `PAGE DOWN` moves
   5 tasks down.
 
-  `HOME` moves to the top of the list and `END` moves
+  `HOME` and `g` moves to the top of the list and `END` and `G` moves
   to the bottom.
 
 * Managing tasks:
@@ -98,13 +93,19 @@ This will create an empty task list which you can open with ctodo by double clic
   `SPACE` and `ENTER` checks/unchecks the selected task.
 
   `D` and `DELETE` deletes the selected task.
+  
+  `SHIFT-UP` moves the selected task up and `SHIFT-DOWN` moves the selected task down.
 
   Press `E` to edit the description of the selected task.
 
   Press `SHIFT-E` to delete the current task description
   and create a new one.
   
-  Press `N` or `INSERT` to create a new task.
+  Press `N`, `SHIFT-A` or `INSERT` to create a new task at the bottom of the list.
+  
+  Press `SHIFT-I` to insert a new task at the top of the list.
+  
+  Press `I` to insert a new task before the selected task, and `A` to insert a new task after the selected task.
 
 * In input-mode:
   
@@ -116,8 +117,7 @@ This will create an empty task list which you can open with ctodo by double clic
 
   Press `T` to edit the title of the task list.
 
-  Press `SHIFT-T` to delete the current title
-  and create a new one.
+  Press `SHIFT-T` to delete the current title and create a new one.
 
   Press `S` to save the list.
 
