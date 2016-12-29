@@ -107,7 +107,7 @@ void move_task_down(TODOLIST *list, TASK *task) {
   }
 }
 
-char *get_option(TODOLIST *todolist, char *key) {
+char *get_option(TODOLIST *todolist, const char *key) {
   OPTION *opt = todolist->first_option;
   while (opt) {
     if (strcmp(key, opt->key) == 0) {
@@ -118,18 +118,17 @@ char *get_option(TODOLIST *todolist, char *key) {
   return NULL;
 }
 
-char *copy_option(TODOLIST *todolist, char *key) {
+char *copy_option(TODOLIST *todolist, const char *key) {
   char *copy = NULL;
   char *value = get_option(todolist, key);
   if (value) {
-    int l = strlen(value) + 1;
-    copy = (char *)malloc(l);
-    memcpy(copy, value, l);
+    copy = (char *)malloc(strlen(value) + 1);
+    strcpy(copy, value);
   }
   return copy;
 }
 
-int get_option_bit(TODOLIST *todolist, char *key) {
+int get_option_bit(TODOLIST *todolist, const char *key) {
   char *value = get_option(todolist, key);
   if (value == NULL) {
     return 0;
@@ -137,12 +136,13 @@ int get_option_bit(TODOLIST *todolist, char *key) {
   return *value != '0';
 }
 
-void set_option(TODOLIST *list, char *key, char *value) {
+void set_option(TODOLIST *list, const char *key, const char *value) {
   OPTION *opt = list->first_option;
   while (opt) {
     if (strcmp(key, opt->key) == 0) {
       free(opt->value);
-      opt->value = value;
+      opt->value = (char *)malloc(strlen(value) + 1);
+      strcpy(opt->value, value);
       return;
     }
     opt = opt->next;
@@ -151,8 +151,10 @@ void set_option(TODOLIST *list, char *key, char *value) {
   if (!opt) {
     return;
   }
-  opt->key = key;
-  opt->value = value;
+  opt->key = (char *)malloc(strlen(key) + 1);
+  strcpy(opt->key, key);
+  opt->value = (char *)malloc(strlen(value) + 1);
+  strcpy(opt->value, value);
   opt->next = NULL;
   if (!list->first_option) {
     list->first_option = opt;
@@ -163,7 +165,7 @@ void set_option(TODOLIST *list, char *key, char *value) {
   list->last_option = opt;
 }
 
-void set_option_bit(TODOLIST *todolist, char *key, int bit) {
+void set_option_bit(TODOLIST *todolist, const char *key, int bit) {
   char *value = (char *)malloc(2);
   value[0] = bit ? '1' : '0';
   value[1] = '\0';

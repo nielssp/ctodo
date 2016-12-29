@@ -99,6 +99,8 @@ void read_next_option(STREAM *file, TODOLIST *list) {
     skip_horizontal_whitespace(file);
     value = read_option_string(file);
     set_option(list, key, value);
+    free(key);
+    free(value);
   }
 }
 

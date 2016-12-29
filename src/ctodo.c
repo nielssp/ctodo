@@ -260,6 +260,7 @@ int main(int argc, char *argv[]) {
   TASK *task = NULL;
   TASK *selected = NULL;
   TODOLIST *todolist = NULL;
+  char *file_version = NULL;
 
   initscr();
   raw();
@@ -278,6 +279,14 @@ int main(int argc, char *argv[]) {
   if (!todolist) {
     error("Could not open %s: %s", filename, get_last_error());
     fatal_error();
+  }
+
+  file_version = copy_option(todolist, "version");
+  if (file_version) {
+    // TODO: compare versions
+  }
+  else {
+    set_option(todolist, "version", CTODO_VERSION);
   }
 
 #ifdef SYNC_ENABLE
