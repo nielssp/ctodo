@@ -7,16 +7,13 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Curses REQUIRED)
 find_package(CURL REQUIRED)
 
-configure_file(
-  "${PROJECT_SOURCE_DIR}/config.h.in"
-  "${PROJECT_BINARY_DIR}/config.h"
-)
+configure_file(src/config.h.in src/config.h)
 
 include_directories("$(CURSES_INCLUDE_DIR)")
 include_directories("$(CURL_INCLUDE_DIR)")
-include_directories("$(PROJECT_BINARY_DIR)")
+include_directories(src)
 
-set(SRC_LIST ctodo.c task.c file.c error.c sync.c stream.c)
+file(GLOB_RECURSE SRC_LIST src/*.c)
 
 add_executable(ctodo ${SRC_LIST})
 
