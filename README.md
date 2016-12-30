@@ -79,52 +79,51 @@ This will create an empty task list which you can open with ctodo by double clic
 ##Commands
 * Navigation:
 
-  Use `UP` and `DOWN` arrows to move between tasks
-  (or `J` and `K`).
+  Use <kbd>UP</kbd> and <kbd>DOWN</kbd> arrows to move between tasks
+  (or <kbd>J</kbd> and <kbd>K</kbd>).
 
-  `PAGE UP` moves 5 tasks up and `PAGE DOWN` moves
+  <kbd>PAGE UP</kbd> moves 5 tasks up and <kbd>PAGE DOWN</kbd> moves
   5 tasks down.
 
-  `HOME` and `g` moves to the top of the list and `END` and `G` moves
-  to the bottom.
+  <kbd>HOME</kbd> and <kbd>g</kbd> moves to the top of the list and
+  <kbd>END</kbd> and <kbd>G</kbd> moves to the bottom.
 
 * Managing tasks:
 
-  `SPACE` and `ENTER` checks/unchecks the selected task.
+  <kbd>SPACE</kbd> and <kbd>ENTER</kbd> checks/unchecks the selected task.
 
-  `D` and `DELETE` deletes the selected task.
+  <kbd>D</kbd> and <kbd>DELETE</kbd> deletes the selected task.
   
-  `SHIFT-UP` moves the selected task up and `SHIFT-DOWN` moves the selected task down.
+  <kbd>SHIFT-UP</kbd> moves the selected task up and <kbd>SHIFT-DOWN</kbd>
+  moves the selected task down.
 
-  Press `E` to edit the description of the selected task.
+  Press <kbd>E</kbd> to edit the description of the selected task.
 
-  Press `SHIFT-E` to delete the current task description
+  Press <kbd>SHIFT-E</kbd> to delete the current task description
   and create a new one.
   
-  Press `N`, `SHIFT-A` or `INSERT` to create a new task at the bottom of the list.
+  Press <kbd>N</kbd>, <kbd>SHIFT-A</kbd> or <kbd>INSERT</kbd> to create a new
+  task at the bottom of the list.
   
-  Press `SHIFT-I` to insert a new task at the top of the list.
+  Press <kbd>SHIFT-I</kbd> to insert a new task at the top of the list.
   
-  Press `I` to insert a new task before the selected task, and `A` to insert a new task after the selected task.
+  Press <kbd>I</kbd> to insert a new task before the selected task, and
+  <kbd>A</kbd> to insert a new task after the selected task.
 
 * In input-mode:
   
-  Press `ENTER` to save the string.
+  Press <kbd>ENTER</kbd> to save the string.
 
-  Press `CTRL-C` or `CTRL-D` to cancel.
+  Press <kbd>CTRL-C</kbd> or <kbd>CTRL-D</kbd> to cancel.
 
 * Managing the task list:
 
-  Press `T` to edit the title of the task list.
+  Press <kbd>T</kbd> to edit the title of the task list.
 
-  Press `SHIFT-T` to delete the current title and create a new one.
+  Press <kbd>SHIFT-T</kbd> to delete the current title and create a new one.
 
-  Press `S` to save the list.
+  Press <kbd>S</kbd> to save the list.
 
-  Press `R` to reload the list (discard unsaved data).
+  Press <kbd>R</kbd> to reload the list (discard unsaved data).
 
-  Press `Q` to save the list and quit.
-
-
-
-
+  Press <kbd>Q</kbd> to save the list and quit.
