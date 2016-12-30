@@ -14,7 +14,7 @@ if(SYNC_ENABLE)
   include_directories("$(CURL_INCLUDE_DIR)")
 endif()
 
-include_directories(src)
+include_directories(${CMAKE_BINARY_DIR}/src src)
 
 file(GLOB SRC_LIST src/*.c)
 
