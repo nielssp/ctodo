@@ -94,7 +94,7 @@ This will create an empty task list which you can open with ctodo by double clic
 
   <kbd>D</kbd> and <kbd>DELETE</kbd> deletes the selected task.
   
-  <kbd>SHIFT-UP</kbd> moves the selected task up and <kbd>SHIFT-DOWN</kbd>
+  <kbd>SHIFT-UP</kbd> and <kbd>M</kbd> moves the selected task up and <kbd>SHIFT-DOWN</kbd> and <kbd>SHIFT-M</kbd>
   moves the selected task down.
 
   Press <kbd>E</kbd> to edit the description of the selected task.

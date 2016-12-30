@@ -1,7 +1,8 @@
-// ctodo
-// Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
-// Licensed under the MIT license.
-// See the LICENSE file or http://opensource.org/licenses/MIT for more information.
+/* ctodo
+ * Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
+ * Licensed under the MIT license.
+ * See the LICENSE file or http://opensource.org/licenses/MIT for more information.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,12 +101,14 @@ size_t stream_read(void *ptr, size_t size, size_t nmemb, STREAM *input) {
         return 0;
       }
       else if (remaining < bytes) {
-        memcpy(ptr, input->obj + input->pos, remaining);
+        char *src = (char *)input->obj + input->pos;
+        memcpy(ptr, src, remaining);
         input->pos += remaining;
         return remaining;
       }
       else {
-        memcpy(ptr, input->obj + input->pos, bytes);
+        char *src = (char *)input->obj + input->pos;
+        memcpy(ptr, src, bytes);
         input->pos += bytes;
         return bytes;
       }
@@ -155,6 +158,23 @@ int stream_eof(STREAM *input) {
   }
 }
 
+int stream_putc(int c, STREAM *output) {
+  unsigned char ch = (unsigned char)c;
+  switch (output->type) {
+    case STREAM_TYPE_FILE:
+      return fputc(c, output->obj);
+    case STREAM_TYPE_BUFFER:
+      if (output->pos >= output->length) {
+        output->obj = resize_buffer(output->obj, output->length, output->length + 100);
+        output->length += 100;
+      }
+      ((char *)output->obj)[output->pos++] = ch;
+      return ch;
+    default:
+      return EOF;
+  }
+}
+
 int stream_vprintf(STREAM *output, const char *format, va_list va) {
   int status = 0, n;
   va_list va2;
@@ -172,8 +192,9 @@ int stream_vprintf(STREAM *output, const char *format, va_list va) {
         output->length += 100;
       }
       while (1) {
+        char *dest = (char *)output->obj + output->pos;
         va_copy(va2, va);
-        n = vsnprintf(output->obj + output->pos, size, format, va2);
+        n = vsnprintf(dest, size, format, va2);
         va_end(va2);
         if (n < 0) {
           return 0;

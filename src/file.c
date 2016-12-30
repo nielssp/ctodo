@@ -1,7 +1,8 @@
-// ctodo
-// Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
-// Licensed under the MIT license.
-// See the LICENSE file or http://opensource.org/licenses/MIT for more information.
+/* ctodo
+ * Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
+ * Licensed under the MIT license.
+ * See the LICENSE file or http://opensource.org/licenses/MIT for more information.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +35,7 @@ void skip_line(STREAM *file) {
   stream_ungetc(c, file);
 }
 
+/* Read until the end of the line or EOF. */
 char *read_string(STREAM *file) {
   int buffersize = 10;
   int c, i = 0;
@@ -55,12 +57,19 @@ char *read_string(STREAM *file) {
   return buffer;
 }
 
+/* Read until the next space, '=', EOL, or EOF. Escape using backslash. */
 char *read_option_string(STREAM *file) {
   int buffersize = 10;
   int c, i = 0;
   char *newbuffer = NULL;
   char *buffer = (char *)malloc(buffersize);
   while ((c = stream_getc(file)) != EOF && c != '\n' && c != '=' && c > ' ') {
+    if (c == '\\') {
+      c = stream_getc(file);
+      if (c == EOF) {
+        break;
+      }
+    }
     buffer[i++] = c;
     if (i >= buffersize) {
       newbuffer = resize_buffer(buffer, buffersize, buffersize + buffersize);
@@ -197,6 +206,19 @@ TODOLIST *parse_todolist(char *source, size_t length) {
   return list;
 }
 
+size_t escape_string(STREAM *output, const char *str) {
+  size_t l = 0;
+  char c;
+  while ((c = *str) != '\0') {
+    if (c == ' ' || c == '\\' || c == '\n' || c == '=') {
+      stream_putc('\\', output);
+    }
+    stream_putc(c, output);
+    str++;
+  }
+  return l;
+}
+
 void write_todolist(STREAM *output, TODOLIST *todolist) {
   OPTION *opt = NULL;
   TASK *task = NULL;
@@ -210,8 +232,11 @@ void write_todolist(STREAM *output, TODOLIST *todolist) {
         stream_printf(output, "\n#");
         width = 1;
       }
-      width += stream_printf(output, " %s=%s",
-          opt->key, opt->value);
+      width += 2;
+      stream_putc(' ', output);
+      width += escape_string(output, opt->key);
+      stream_putc('=', output);
+      width += escape_string(output, opt->value);
       opt = opt->next;
     }
     stream_printf(output, "\n");
@@ -236,7 +261,6 @@ char *stringify_todolist(TODOLIST *todolist) {
 }
 
 int save_todolist(TODOLIST *todolist, char *filename) {
-  STREAM *output;
   STREAM *file = stream_file(filename, "w");
   if (!file) {
     error("%s", strerror(errno));

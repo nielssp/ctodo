@@ -1,13 +1,15 @@
-// ctodo
-// Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
-// Licensed under the MIT license.
-// See the LICENSE file or http://opensource.org/licenses/MIT for more information.
+/* ctodo
+ * Copyright (c) 2016 Niels Sonnich Poulsen (http://nielssp.dk)
+ * Licensed under the MIT license.
+ * See the LICENSE file or http://opensource.org/licenses/MIT for more information.
+ */
 
 #include <ncurses.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include <locale.h>
 
 #include "config.h"
 #include "task.h"
@@ -233,12 +235,12 @@ void print_bar(char *status, int rows, int cols, int tasks) {
     mvprintw(0, i, " ");
   }
   mvprintw(0, 2, "ctodo %s", CTODO_VERSION);
+  x = cols / 2 - strlen(status) / 2;
+  mvprintw(0, x, "%s", status);
   mvprintw(0, cols - 18, "%10d %stask%s", 
       tasks,
       tasks == 1 ? " " : "",
       tasks == 1 ? "" : "s");
-  x = cols / 2 - strlen(status) / 2;
-  mvprintw(0, x, "%s", status);
   attroff(A_REVERSE);
 }
 
@@ -262,6 +264,7 @@ int main(int argc, char *argv[]) {
   TODOLIST *todolist = NULL;
   char *file_version = NULL;
 
+  setlocale(LC_ALL, "");
   initscr();
   raw();
   clear();
@@ -293,12 +296,14 @@ int main(int argc, char *argv[]) {
   if (get_option_bit(todolist, "autosync")) {
     origin = copy_option(todolist, "origin");
     if (origin) {
+      getmaxyx(stdscr, rows, cols);
       mvprintw(2, 5, "Synchronizing tasks...");
       mvprintw(4, 5, "Downloading:");
       print_multiline(5, 5, origin, cols - 9);
       refresh();
       // TODO: merge
       TODOLIST *new = pull_todolist(origin);
+      clear();
       if (new) {
         delete_todolist(todolist);
         todolist = new;
@@ -389,6 +394,7 @@ int main(int argc, char *argv[]) {
         highlight = i - 1;
         clear();
         break;
+      case 'm':
       case 337: /* S-Up */
         if (selected) {
           move_task_up(todolist, selected);
@@ -397,6 +403,7 @@ int main(int argc, char *argv[]) {
           clear();
         }
         break;
+      case 'M':
       case 336: /* S-Down */
         if (selected) {
           move_task_down(todolist, selected);
@@ -610,7 +617,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (ch == 'q' || ch == 'Q') {
-      if (status == STATUS_SAVED || save_todolist(todolist, filename) || ch == 'Q') {
+      if (save_todolist(todolist, filename) || ch == 'Q') {
         break;
       }
       else {
