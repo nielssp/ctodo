@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
   char *origin = NULL;
   char *status = STATUS_SAVED;
   int rows, cols, ch, y, highlight = 0, i = 0,
-      orows, ocols, top = 0, bottom = 0;
+      orows, ocols, top = 0, bottom = 0, full = 0;
   TASK *task = NULL;
   TASK *selected = NULL;
   TODOLIST *todolist = NULL;
@@ -219,6 +219,7 @@ int main(int argc, char *argv[]) {
       i++;
       task = task->next;
     }
+    full = y >= rows - 3;
     if (bottom != i - 1) {
       mvprintw(y++, 2, " * ");
     }
@@ -381,6 +382,10 @@ int main(int argc, char *argv[]) {
             add_task(todolist, input_text, 0, 0);
           }
           status = STATUS_UNSAVED;
+          if (full && bottom == highlight && bottom < i) {
+            top++;
+          }
+          bottom++;
           highlight++;
           i++;
         }
@@ -400,7 +405,11 @@ int main(int argc, char *argv[]) {
         if (input_text[0]) {
           add_task(todolist, input_text, 0, 0);
           status = STATUS_UNSAVED;
+          if (full && bottom < i) {
+            top++;
+          }
           highlight = i;
+          bottom++;
           i++;
         }
         else {

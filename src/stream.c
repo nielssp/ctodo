@@ -150,7 +150,7 @@ void stream_ungetc(int c, STREAM *input) {
 int stream_eof(STREAM *input) {
   switch (input->type) {
     case STREAM_TYPE_FILE:
-      return feof(input->obj);
+      return feof((FILE *)input->obj);
     case STREAM_TYPE_BUFFER:
       return input->pos >= input->length;
     default:

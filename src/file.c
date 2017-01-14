@@ -224,6 +224,12 @@ void write_todolist(STREAM *output, TODOLIST *todolist) {
   TASK *task = NULL;
   int width = 0;
   stream_printf(output, "%s\n", todolist->title);
+  task = todolist->first;
+  while (task) {
+    stream_printf(output, "[%c] %s\n",
+        task->done ? 'X' : ' ', task->message);
+    task = task->next;
+  }
   opt = todolist->first_option;
   if (opt) {
     width += stream_printf(output, "#");
@@ -240,12 +246,6 @@ void write_todolist(STREAM *output, TODOLIST *todolist) {
       opt = opt->next;
     }
     stream_printf(output, "\n");
-  }
-  task = todolist->first;
-  while (task) {
-    stream_printf(output, "[%c] %s\n",
-        task->done ? 'X' : ' ', task->message);
-    task = task->next;
   }
 }
 
