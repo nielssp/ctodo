@@ -8,6 +8,14 @@
 #ifndef EDIT_H
 #define EDIT_H
 
+/* Key command description */
+typedef struct {
+  char *key;
+  char *func;
+} COMMAND;
+
+/* Print a list of commands at the bottom of the screen. */
+void print_commands(COMMAND *commands, int y, int width, int height);
 /* Open an editor with the given prompt and return the result. */
 char *get_input(char *prompt);
 /* Open an editor with the given prompt and content and return the result. */

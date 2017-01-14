@@ -25,18 +25,15 @@
 #define STATUS_SAVED "Saved"
 #define STATUS_UNSAVED "Unsaved"
 
-struct {
-  char key;
-  char *func;
-} key_funcs[] = {
-  {'Q', "Quit"},
-  {'S', "Save"},
-  {'R', "Reload"},
-  {'N', "New"},
-  {'E', "Edit"},
-  {'D', "Delete"},
-  {'T', "Title"},
-  {0, NULL}
+COMMAND main_commands[] = {
+  {"Q", "Quit"},
+  {"S", "Save"},
+  {"R", "Reload"},
+  {"N", "New"},
+  {"E", "Edit"},
+  {"D", "Delete"},
+  {"T", "Title"},
+  {NULL, NULL}
 };
 
 int print_multiline(int y, int x, char *str, int maxwidth) {
@@ -93,12 +90,7 @@ void print_message(char *format, ...) {
 
 void print_bar(char *status, int rows, int cols, int tasks) {
   int i, x;
-  for (i = 0; key_funcs[i].key > 0; i++) {
-    attron(A_REVERSE);
-    mvprintw(rows - 1, i * 9, "%c", key_funcs[i].key);
-    attroff(A_REVERSE);
-    mvprintw(rows - 1, i * 9 + 2, "%s", key_funcs[i].func);
-  }
+  print_commands(main_commands, rows - 1, cols, 1);
   attron(A_REVERSE);
   for (i = 0; i < cols; i++) {
     mvprintw(0, i, " ");

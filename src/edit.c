@@ -11,6 +11,29 @@
 #include "error.h"
 #include "stream.h"
 
+COMMAND edit_commands[] = {
+  {"^C", "Cancel"},
+  {NULL, NULL}
+};
+
+void print_commands(COMMAND *commands, int y, int width, int height) {
+  size_t kwidth;
+  int i;
+  int show = width / 12;
+  int cwidth = width / show;
+  for (i = 0; i < height; i++) {
+    move(y + i, 0);
+    clrtoeol();
+  }
+  for (i = 0; commands[i].key != NULL && i < show; i++) {
+    attron(A_REVERSE);
+    kwidth = strlen(commands[i].key);
+    mvprintw(y + i % height, i / height * cwidth, "%s", commands[i].key);
+    attroff(A_REVERSE);
+    mvprintw(y + i % height, i / height * cwidth + kwidth, " %s", commands[i].func);
+  }
+}
+
 char *get_input(char *prompt) {
   return get_input_edit(prompt, NULL);
 }
@@ -21,6 +44,7 @@ char *get_input_edit(char *prompt, char *buffer) {
   int bufferlines = 1, cursorpos = 0;
   char *newbuffer = NULL;
   getmaxyx(stdscr, rows, cols);
+  print_commands(edit_commands, rows - 1, cols, 1);
   lineoffset = strlen(prompt) + 1;
   linesize = cols - lineoffset;
   buffersize = linesize * bufferlines;
