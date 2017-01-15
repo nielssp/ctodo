@@ -1,2 +1,3 @@
 #cmakedefine CTODO_VERSION "@CTODO_VERSION@"
 #cmakedefine SYNC_ENABLE
+#cmakedefine READLINE_ENABLE

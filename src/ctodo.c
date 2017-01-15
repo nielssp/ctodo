@@ -14,9 +14,14 @@
 #include "config.h"
 #include "task.h"
 #include "file.h"
-#include "edit.h"
 #include "stream.h"
 #include "error.h"
+
+#ifdef READLINE_ENABLE
+#include "wedit.h"
+#else
+#include "edit.h"
+#endif
 
 #ifdef SYNC_ENABLE
 #include "sync.h"
@@ -66,6 +71,7 @@ int print_multiline(int y, int x, char *str, int maxwidth) {
       lc = sc;
     }
   }
+  free(temp);
   return splits;
 }
 
@@ -147,7 +153,8 @@ int main(int argc, char *argv[]) {
 
   file_version = copy_option(todolist, "version");
   if (file_version) {
-    // TODO: compare versions
+    /* TODO: compare versions */
+    free(file_version);
   }
   else {
     set_option(todolist, "version", CTODO_VERSION);
@@ -162,7 +169,7 @@ int main(int argc, char *argv[]) {
       mvprintw(4, 5, "Downloading:");
       print_multiline(5, 5, origin, cols - 9);
       refresh();
-      // TODO: merge
+      /* TODO: merge */
       TODOLIST *new = pull_todolist(origin);
       clear();
       if (new) {
@@ -275,7 +282,7 @@ int main(int argc, char *argv[]) {
         }
         break;
 #ifdef SYNC_ENABLE
-      case 'z': // TODO
+      case 'z': /* TODO */
         if (origin) {
             print_message("Synchronizing tasks...");
           refresh();
@@ -409,11 +416,12 @@ int main(int argc, char *argv[]) {
         }
         clear();
         break;
+      case 'c':
       case 'E':
         if (!selected) {
           break;
         }
-        input_text = get_input("Set task");
+        input_text = get_input("Change task");
         if (!input_text)
           fatal_error();
         if (input_text[0]) {
@@ -444,7 +452,7 @@ int main(int argc, char *argv[]) {
         clear();
         break;
       case 'T':
-        input_text = get_input("Set title");
+        input_text = get_input("Change title");
         if (!input_text)
           fatal_error();
         if (input_text[0]) {
@@ -498,6 +506,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  delete_todolist(todolist);
   endwin();
   return 0;
 }

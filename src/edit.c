@@ -104,17 +104,21 @@ char *get_input_edit(char *prompt, char *buffer) {
       break;
     }
     switch (ch) {
+      case 2: /* ^B */
       case KEY_LEFT:
         if (cursorpos > 0)
           cursorpos--;
         break;
+      case 6: /* ^F */
       case KEY_RIGHT:
         if (cursorpos < bc)
           cursorpos++;
         break;
+      case 1: /* ^A */
       case 262: /* home */
         cursorpos = 0;
         break;
+      case 5: /* ^E */
       case 360: /* end */
         cursorpos = bc;
         break;
