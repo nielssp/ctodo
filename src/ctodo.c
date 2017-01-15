@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
   raw();
   clear();
   curs_set(0);
-  keypad(stdscr, TRUE);
+  keypad(stdscr, 1);
   noecho();
 
   if (argc > 1) {

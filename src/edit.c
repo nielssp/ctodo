@@ -19,7 +19,7 @@ COMMAND edit_commands[] = {
 void print_commands(COMMAND *commands, int y, int width, int height) {
   size_t kwidth;
   int i;
-  int show = width / 12;
+  int show = width / 11;
   int cwidth = width / show;
   for (i = 0; i < height; i++) {
     move(y + i, 0);
