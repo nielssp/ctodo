@@ -85,16 +85,12 @@ size_t display_width(const char *str, size_t n, size_t line_width, size_t cursor
       cursor_set = 1;
     }
     wc_len = mbrtowc(&wc, str + i, MB_CUR_MAX, &shift_state);
-    switch (wc_len) {
-      case (size_t)-1:
-      case (size_t)-2:
-        width += strnlen(str + i, n - i);
-      case 0:
-        delwin(win);
-        if (!cursor_set) {
-          *cursor_pos = width;
-        }
-        return width;
+    if (wc_len == (size_t)-1 || wc_len == (size_t)-2) {
+      width += strnlen(str + i, n - i);
+      wc_len = 0;
+    }
+    if (!wc_len) {
+      break;
     }
     if (wc == '\t') {
       width += 8 - width % line_width % 8;

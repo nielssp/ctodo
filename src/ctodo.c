@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include <wchar.h>
 #include <locale.h>
 
 #include "config.h"
@@ -41,38 +42,44 @@ COMMAND main_commands[] = {
   {NULL, NULL}
 };
 
-int print_multiline(int y, int x, char *str, int maxwidth) {
-  int sc = 0, tc = 0, lc = 0, bc = 0;
-  int splits = 0;
-  char *temp = (char *)malloc(maxwidth + 1);
-  while (str[sc]) {
-    if (tc == 0 && isspace(str[sc])) {
-      sc++;
+int print_multiline(int top, int offset, const char *str, size_t max_width) {
+  mbstate_t shift_state;
+  wchar_t wc;
+  size_t x = offset;
+  size_t y = top;
+  size_t wc_len;
+  size_t n = strlen(str);
+  for (size_t i = 0; i < n; i += wc_len) {
+    wc_len = mbrtowc(&wc, str + i, MB_CUR_MAX, &shift_state);
+    if (!wc_len || wc_len == (size_t)-1 || wc_len == (size_t)-2) {
+      break;
+    }
+    mvprintw(y, x, "%C", wc);
+    size_t new_x, new_y;
+    getyx(stdscr, new_y, new_x);
+    if (new_y > y) {
+      y = new_y;
+      if (new_x > 0) {
+        move(new_y, 0);
+        clrtoeol();
+        mvprintw(y, offset, "%C", wc);
+      }
+      x = offset + new_x;
+    }
+    else if (new_x - offset > max_width) {
+      move(y, x);
+      clrtoeol();
+      mvprintw(y + 1, offset, "%C", wc);
+      getyx(stdscr, y, x);
     }
     else {
-      temp[tc++] = str[sc++];
-    }
-    if (tc >= maxwidth || !str[sc]) {
-      temp[tc] = 0;
-      if (!isspace(str[sc]) && str[sc] != 0) {
-        bc = sc;
-        while (bc > lc) {
-          if (isspace(str[bc])) {
-            temp[bc - lc] = 0;
-            sc = bc;
-            break;
-          }
-          bc--;
-        }
-      }
-      mvprintw(y++, x, "%s", temp);
-      splits++;
-      tc = 0;
-      lc = sc;
+      x = new_x;
     }
   }
-  free(temp);
-  return splits;
+  if (x > offset || y == top) {
+    return y - top + 1;
+  }
+  return y - top;
 }
 
 void print_message(char *format, ...) {
@@ -133,10 +140,8 @@ int main(int argc, char *argv[]) {
 
   setlocale(LC_ALL, "");
   initscr();
-  raw();
   clear();
   curs_set(0);
-  keypad(stdscr, 1);
   noecho();
 
   if (argc > 1) {
@@ -183,6 +188,8 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
+  raw();
+  keypad(stdscr, 1);
   while (1) {
     orows = rows;
     ocols = cols;
