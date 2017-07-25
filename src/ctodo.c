@@ -49,6 +49,7 @@ int print_multiline(int top, int offset, const char *str, size_t max_width) {
   size_t y = top;
   size_t wc_len;
   size_t n = strlen(str);
+  memset(&shift_state, '\0', sizeof shift_state);
   for (size_t i = 0; i < n; i += wc_len) {
     wc_len = mbrtowc(&wc, str + i, MB_CUR_MAX, &shift_state);
     if (!wc_len || wc_len == (size_t)-1 || wc_len == (size_t)-2) {

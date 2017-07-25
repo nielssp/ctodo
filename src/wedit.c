@@ -146,12 +146,11 @@ void callback(char *line) {
   if (line == NULL) {
     input_buffer = malloc(1);
     input_buffer[0] = 0;
-    stop = 1;
   }
   else {
     input_buffer = line;
-    stop = 1;
   }
+  stop = 1;
 }
 
 char *get_input_edit(const char *prompt, const char *buffer) {
@@ -193,7 +192,7 @@ char *get_input_edit(const char *prompt, const char *buffer) {
       case 27: /* ESC */
         /* TODO: the old editor would close on ESC, however when the keypad is
          * disabled (necessary when forwarding key presses to ncurses), an ESC
-         * character preces any escape sequence (e.g. arrow keys etc.). */
+         * character precedes any escape sequence (e.g. arrow keys etc.). */
       default:
         push_input(c);
     }
