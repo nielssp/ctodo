@@ -76,7 +76,7 @@ using the installer, the option `Task List` should be available. Click on it.
 This will create an empty task list which you can open with ctodo by double clicking on it
 (if you installed using the installer).
 
-##Commands
+## Commands
 * Navigation:
 
   Use <kbd>UP</kbd> and <kbd>DOWN</kbd> arrows to move between tasks
